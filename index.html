@@ -1,1 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Lab 4 Map</title>
 
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+
+<style>
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+
+.menu {
+  position: absolute;
+  background: white;
+  padding: 10px;
+  top: 10px;
+  left: 10px;
+  font-family: sans-serif;
+  border-radius: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<div class="menu">
+<label>
+<input type="checkbox" id="layer1" checked>
+Tileset 1
+</label>
+</div>
+
+<script>
+
+mapboxgl.accessToken = 'pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg';
+
+const map = new mapboxgl.Map({
+container: 'map',
+style: 'mapbox://styles/mapbox/light-v11',
+center: [-122.32, 47.61],
+zoom: 14
+});
+
+map.addControl(new mapboxgl.NavigationControl());
+
+map.on('load', () => {
+
+map.addSource('tiles1', {
+type: 'raster',
+tiles: [
+'assets/tileset_1/{z}/{x}/{y}.png'
+],
+tileSize: 256
+});
+
+map.addLayer({
+id: 'tiles1-layer',
+type: 'raster',
+source: 'tiles1'
+});
+
+document.getElementById('layer1').addEventListener('change', (e) => {
+map.setLayoutProperty(
+'tiles1-layer',
+'visibility',
+e.target.checked ? 'visible' : 'none'
+);
+});
+
+});
+
+</script>
+
+</body>
+</html>
