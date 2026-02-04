@@ -10,12 +10,29 @@
 <style>
 body { margin:0; padding:0; }
 #map { position:absolute; top:0; bottom:0; width:100%; }
+
+.menu {
+    position: absolute;
+    background: white;
+    padding: 10px;
+    top: 10px;
+    left: 10px;
+    font-family: sans-serif;
+    border-radius: 4px;
+}
 </style>
 </head>
 
 <body>
 
 <div id="map"></div>
+
+<div class="menu">
+<label><input type="checkbox" id="layer1" checked> Tileset 1</label><br>
+<label><input type="checkbox" id="layer2"> Tileset 2</label><br>
+<label><input type="checkbox" id="layer3"> Tileset 3</label><br>
+<label><input type="checkbox" id="layer4"> Tileset 4</label>
+</div>
 
 <script>
 
@@ -30,19 +47,36 @@ const map = new mapboxgl.Map({
 
 map.on('load', () => {
 
-    map.addSource('tileset1', {
-        type: 'raster',
-        tiles: [
-            'assets/tileset_1_basemap/{z}/{x}/{y}.png'
-        ],
-        tileSize: 256,
-        attribution: 'Lab 4 tiles'
-    });
+    const tilesets = [
+        { id: 'layer1', path: 'assets/tileset_1_basemap/{z}/{x}/{y}.png' },
+        { id: 'layer2', path: 'assets/tileset_2/{z}/{x}/{y}.png' },
+        { id: 'layer3', path: 'assets/tileset_3/{z}/{x}/{y}.png' },
+        { id: 'layer4', path: 'assets/tileset_4/{z}/{x}/{y}.png' }
+    ];
 
-    map.addLayer({
-        id: 'tileset1-layer',
-        type: 'raster',
-        source: 'tileset1'
+    tilesets.forEach(ts => {
+        map.addSource(ts.id, {
+            type: 'raster',
+            tiles: [ts.path],
+            tileSize: 256
+        });
+
+        map.addLayer({
+            id: ts.id,
+            type: 'raster',
+            source: ts.id,
+            layout: {
+                visibility: ts.id === 'layer1' ? 'visible' : 'none'
+            }
+        });
+
+        document.getElementById(ts.id).addEventListener('change', e => {
+            map.setLayoutProperty(
+                ts.id,
+                'visibility',
+                e.target.checked ? 'visible' : 'none'
+            );
+        });
     });
 
 });
