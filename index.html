@@ -1,47 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Lab 4 Map</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
 
-// map
-var map = L.map('map').setView([47.6062, -122.3321], 13);
+  // Center map on Seattle
+  var map = L.map('map').setView([47.61, -122.33], 12);
 
-// tileset 1 (your basemap)
-var myBasemap = L.tileLayer(
-  'assets/tileset_1_basemap/{z}/{x}/{y}.png',
-  {
-    minZoom: 15,
-    maxZoom: 16,
-    attribution: "My basemap"
-  }
-).addTo(map);
+  // Basemap tileset 1
+  var basemap = L.tileLayer('assets/tileset_1_basemap/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: 'My basemap'
+  }).addTo(map);
 
-// tileset 2 (parks)
-var parks = L.tileLayer(
-  'assets/tileset_2_parks/{z}/{x}/{y}.png',
-  {
-    minZoom: 15,
-    maxZoom: 16,
-    attribution: "Seattle Parks"
-  }
-);
+  // Parks tileset 2
+  var parks2 = L.tileLayer('assets/tileset_2_parks/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: 'Seattle Parks (tileset 2)'
+  });
 
-// tileset 3 (combined)
-var combined = L.tileLayer(
-  'assets/tileset_3_parks/{z}/{x}/{y}.png',
-  {
-    minZoom: 15,
-    maxZoom: 16,
-    attribution: "Basemap + Parks"
-  }
-);
+  // Parks tileset 3
+  var parks3 = L.tileLayer('assets/tileset_3_parks/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: 'Seattle Parks (tileset 3)'
+  });
 
-// layer control
-L.control.layers(
-  {
-    "My basemap (tileset 1)": myBasemap,
-    "Combined (tileset 3)": combined
-  },
-  {
-    "Parks (tileset 2)": parks
-  }
-).addTo(map);
+  // Layer control
+  var baseMaps = {
+      "My basemap (tileset 1)": basemap
+  };
+
+  var overlays = {
+      "Parks (tileset 2)": parks2,
+      "Parks (tileset 3)": parks3
+  };
+
+  L.control.layers(baseMaps, overlays).addTo(map);
 
 </script>
+
+</body>
+</html>
