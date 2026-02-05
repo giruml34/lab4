@@ -1,68 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<title>Seattle Parks Map</title>
+<meta charset="utf-8" />
+<title>Seattle Parks</title>
 
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
 
 <style>
-body { margin:0; padding:0; }
-#map { position:absolute; top:0; bottom:0; width:100%; }
-
-.menu {
-  position:absolute;
-  background:white;
-  padding:10px;
-  top:10px;
-  left:10px;
-  z-index:1;
-  font-family:sans-serif;
-  border-radius:5px;
-}
+  body { margin: 0; padding: 0; }
+  #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+  .menu {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    font-family: sans-serif;
+    z-index: 1;
+  }
 </style>
 </head>
 
 <body>
-
 <div id="map"></div>
 
 <div class="menu">
-<label><input type="checkbox" id="basemap" checked> Basemap</label><br>
-<label><input type="checkbox" id="parks" checked> Parks</label>
+  <label><input type="checkbox" id="tileset1" checked> Tileset 1 (Your basemap tiles)</label><br>
+  <label><input type="checkbox" id="tileset2" checked> Tileset 2 (Parks)</label>
 </div>
 
 <script>
-
 mapboxgl.accessToken = 'pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg';
-
-// Seattle bounding box (locks map area)
-const bounds = [
-  [-122.42, 47.55], // southwest
-  [-122.22, 47.72]  // northeast
-];
 
 const map = new mapboxgl.Map({
   container: 'map',
-  style: {
-    "version": 8,
-    "sources": {},
-    "layers": [
-      { "id": "bg", "type": "background", "paint": { "background-color": "#ffffff" } }
-    ]
-  },
+  style: 'mapbox://styles/mapbox/light-v11',   // <-- Mapbox fills the whole screen
   center: [-122.33, 47.61],
-  zoom: 14,
-  minZoom: 12,
-  maxZoom: 18,
-  maxBounds: bounds
+  zoom: 12
 });
 
 map.addControl(new mapboxgl.NavigationControl());
 
 map.on('load', () => {
 
+  // Tileset 1 (your exported basemap tiles)
   map.addSource('tileset_1', {
     type: 'raster',
     tiles: ['assets/tileset_1_basemap/{z}/{x}/{y}.png'],
@@ -72,9 +55,11 @@ map.on('load', () => {
   map.addLayer({
     id: 'tileset_1',
     type: 'raster',
-    source: 'tileset_1'
+    source: 'tileset_1',
+    paint: { 'raster-opacity': 1 }
   });
 
+  // Tileset 2 (parks tiles)
   map.addSource('tileset_2', {
     type: 'raster',
     tiles: ['assets/tileset_2_parks/{z}/{x}/{y}.png'],
@@ -84,21 +69,19 @@ map.on('load', () => {
   map.addLayer({
     id: 'tileset_2',
     type: 'raster',
-    source: 'tileset_2'
+    source: 'tileset_2',
+    paint: { 'raster-opacity': 1 }
   });
 
 });
 
-// Layer toggles
-document.getElementById('basemap').onchange = function(e) {
+// toggle checkboxes
+document.getElementById('tileset1').onchange = (e) => {
   map.setLayoutProperty('tileset_1', 'visibility', e.target.checked ? 'visible' : 'none');
 };
-
-document.getElementById('parks').onchange = function(e) {
+document.getElementById('tileset2').onchange = (e) => {
   map.setLayoutProperty('tileset_2', 'visibility', e.target.checked ? 'visible' : 'none');
 };
-
 </script>
-
 </body>
 </html>
