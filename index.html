@@ -1,79 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <title>Lab 4 - Seattle Parks</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<title>Lab 4</title>
 
-  <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <style>
-    html, body { height: 100%; margin: 0; }
-    #map { height: 100vh; width: 100vw; }
-    .leaflet-control-layers { font-size: 14px; }
-  </style>
+<style>
+  html, body { margin:0; height:100%; }
+  #map { height:100vh; width:100vw; }
+</style>
 </head>
 
 <body>
-  <div id="map"></div>
+<div id="map"></div>
 
-  <!-- Leaflet JS -->
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-  ></script>
+<script>
 
-  <script>
-    // 1) Create map (Seattle area)
-    const map = L.map('map', {
-      zoomControl: true
-    }).setView([47.6062, -122.3321], 11);
+var map = L.map('map').setView([47.6062, -122.3321], 12);
 
-    // 2) YOUR local tiles (GitHub Pages paths)
-    //    Make sure these folders exist exactly:
-    //    lab4/assets/tileset_1_basemap/{z}/{x}/{y}.png
-    //    lab4/assets/tileset_2_parks/{z}/{x}/{y}.png
+// ✅ Tileset 1 (colon must be encoded)
+var basemap = L.tileLayer(
+  'assets/tileset_1_basemap%3A/{z}/{x}/{y}.png',
+  { maxZoom: 18 }
+);
 
-    const myBasemap = L.tileLayer('assets/tileset_1_basemap/{z}/{x}/{y}.png', {
-      minZoom: 0,
-      maxZoom: 19,
-      attribution: 'My basemap (local tiles)'
-    });
+// ✅ Tileset 2 (no encoding needed)
+var parks = L.tileLayer(
+  'assets/tileset_2_parks/{z}/{x}/{y}.png',
+  { maxZoom: 18, opacity: 0.85 }
+);
 
-    const parks = L.tileLayer('assets/tileset_2_parks/{z}/{x}/{y}.png', {
-      minZoom: 0,
-      maxZoom: 19,
-      opacity: 0.85,     // you can change this
-      attribution: 'Seattle Parks (local tiles)'
-    });
+// add layers
+basemap.addTo(map);
+parks.addTo(map);
 
-    // 3) Add basemap FIRST so you don't get the white background
-    myBasemap.addTo(map);
-    parks.addTo(map);
+// layer control
+L.control.layers(null, {
+  "My basemap (tileset_1)": basemap,
+  "Parks (tileset_2)": parks
+}).addTo(map);
 
-    // 4) Layer control (this is where the label becomes "My basemap")
-    const baseLayers = {
-      "My basemap (tileset_1)": myBasemap
-    };
-
-    const overlays = {
-      "Parks (tileset_2)": parks
-    };
-
-    L.control.layers(baseLayers, overlays, { collapsed: false }).addTo(map);
-
-    // 5) Optional: keep the map from going to weird empty world copies
-    map.setMaxBounds([
-      [-85, -180],
-      [ 85,  180]
-    ]);
-  </script>
+</script>
 </body>
 </html>
