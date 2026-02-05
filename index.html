@@ -1,98 +1,120 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>My Seattle Parks Map</title>
-  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Lab 4 - Seattle Parks Tiles</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <script src="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js"></script>
-  <link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet" />
+  <!-- Mapbox GL JS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
   <style>
-    body { margin: 0; padding: 0; }
+    html, body { height: 100%; margin: 0; padding: 0; }
     #map { position: absolute; top: 0; bottom: 0; width: 100%; }
 
-    .menu {
+    /* Simple layer switcher box */
+    .layer-control {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      background: white;
+      top: 12px;
+      left: 12px;
+      background: rgba(255,255,255,0.92);
       padding: 10px 12px;
-      border-radius: 6px;
-      font-family: sans-serif;
+      border-radius: 8px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       font-size: 14px;
-      z-index: 1;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.15);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      max-width: 240px;
     }
-    .menu b { display:block; margin-bottom:6px; }
+    .layer-control h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+    }
+    .layer-control label { display: block; margin: 6px 0; cursor: pointer; }
   </style>
 </head>
 
 <body>
   <div id="map"></div>
 
-  <div class="menu">
-    <b>Layers</b>
-    <label><input type="checkbox" id="toggle-basemap" checked> My Basemap (tileset_1)</label><br>
-    <label><input type="checkbox" id="toggle-parks" checked> Parks (tileset_2)</label>
+  <div class="layer-control">
+    <h3>Layers</h3>
+    <label>
+      <input id="toggle-basemap" type="checkbox" checked />
+      My basemap (tileset_1)
+    </label>
+    <label>
+      <input id="toggle-parks" type="checkbox" checked />
+      Parks (tileset_2)
+    </label>
   </div>
 
   <script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg';
+    // ✅ Your Mapbox token (as you provided)
+    mapboxgl.accessToken = "pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg";
+
+    // Use an "empty" style so ONLY your local raster tiles show (no default Mapbox basemap)
+    const emptyStyle = {
+      version: 8,
+      sources: {},
+      layers: [
+        { id: "background", type: "background", paint: { "background-color": "#f7f7f7" } }
+      ]
+    };
 
     const map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/mapbox/light-v11', // background basemap
-      center: [-122.33, 47.60],
+      container: "map",
+      style: emptyStyle,
+      center: [-122.3321, 47.6062], // Seattle
       zoom: 12
     });
 
-    map.on('load', () => {
+    map.addControl(new mapboxgl.NavigationControl(), "top-right");
+    map.addControl(new mapboxgl.ScaleControl({ maxWidth: 120, unit: "imperial" }));
 
-      // --- TILESET 1: YOUR BASEMAP TILES (draw first, so it's underneath parks) ---
-      map.addSource('tileset_1_basemap', {
-        type: 'raster',
-        tiles: ['assets/tileset_1_basemap/{z}/{x}/{y}.png'],
+    map.on("load", () => {
+      // 1) My basemap tiles (tileset_1_basemap)
+      map.addSource("tileset1-basemap", {
+        type: "raster",
+        tiles: [
+          "assets/tileset_1_basemap/{z}/{x}/{y}.png"
+        ],
         tileSize: 256
       });
 
       map.addLayer({
-        id: 'tileset_1_basemap_layer',
-        type: 'raster',
-        source: 'tileset_1_basemap'
+        id: "my-basemap",
+        type: "raster",
+        source: "tileset1-basemap"
       });
 
-      // --- TILESET 2: PARKS (draw on top) ---
-      map.addSource('tileset_2_parks', {
-        type: 'raster',
-        tiles: ['assets/tileset_2_parks/{z}/{x}/{y}.png'],
+      // 2) Parks tiles (tileset_2_parks 2) -> space must be %20
+      map.addSource("tileset2-parks", {
+        type: "raster",
+        tiles: [
+          "assets/tileset_2_parks%202/{z}/{x}/{y}.png"
+        ],
         tileSize: 256
       });
 
       map.addLayer({
-        id: 'tileset_2_parks_layer',
-        type: 'raster',
-        source: 'tileset_2_parks'
+        id: "parks",
+        type: "raster",
+        source: "tileset2-parks"
       });
 
-      // Toggle: basemap tileset_1
-      document.getElementById('toggle-basemap').addEventListener('change', (e) => {
-        map.setLayoutProperty(
-          'tileset_1_basemap_layer',
-          'visibility',
-          e.target.checked ? 'visible' : 'none'
-        );
+      // Layer toggles
+      function setVisibility(layerId, visible) {
+        map.setLayoutProperty(layerId, "visibility", visible ? "visible" : "none");
+      }
+
+      document.getElementById("toggle-basemap").addEventListener("change", (e) => {
+        setVisibility("my-basemap", e.target.checked);
       });
 
-      // Toggle: parks tileset_2
-      document.getElementById('toggle-parks').addEventListener('change', (e) => {
-        map.setLayoutProperty(
-          'tileset_2_parks_layer',
-          'visibility',
-          e.target.checked ? 'visible' : 'none'
-        );
+      document.getElementById("toggle-parks").addEventListener("change", (e) => {
+        setVisibility("parks", e.target.checked);
       });
-
     });
   </script>
 </body>
