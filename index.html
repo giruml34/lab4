@@ -1,73 +1,104 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>Lab 4 – Seattle Parks</title>
+<meta charset="utf-8">
+<title>My Seattle Parks Map</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 
-  <style>
-    body { margin: 0; padding: 0; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet">
 
-    .menu {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: white;
-      padding: 10px;
-      border-radius: 6px;
-      font-family: sans-serif;
-      z-index: 1;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.2);
-    }
-  </style>
+<style>
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+
+.menu {
+  position: absolute;
+  background: white;
+  padding: 10px;
+  margin: 10px;
+  font-family: sans-serif;
+  z-index: 1;
+}
+</style>
 </head>
 
 <body>
-  <div id="map"></div>
 
-  <div class="menu">
-    <label><input type="checkbox" id="parks" checked> Parks (tileset_2)</label>
-  </div>
+<div id="map"></div>
 
-  <script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg';
+<div class="menu">
+<label><input type="checkbox" id="basemap" checked> My Basemap</label><br>
+<label><input type="checkbox" id="parks" checked> Parks</label>
+</div>
 
-    const map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/mapbox/light-v11', // 
-      center: [-122.33, 47.61],
-      zoom: 12
-    });
+<script>
 
-    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+mapboxgl.accessToken = 'pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg';
 
-    map.on('load', () => {
-      // Parks tileset (overlay)
-      map.addSource('tileset_2_parks', {
-        type: 'raster',
-        tiles: ['assets/tileset_2_parks/{z}/{x}/{y}.png'],
-        tileSize: 256
-      });
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/light-v11', // background basemap
+  center: [-122.33, 47.60],
+  zoom: 12
+});
 
-      map.addLayer({
-        id: 'tileset_2_parks',
-        type: 'raster',
-        source: 'tileset_2_parks',
-        paint: { 'raster-opacity': 1 }
-      });
-    });
+map.on('load', () => {
 
-    document.getElementById('parks').addEventListener('change', (e) => {
-      map.setLayoutProperty(
-        'tileset_2_parks',
-        'visibility',
-        e.target.checked ? 'visible' : 'none'
-      );
-    });
-  </script>
+  // TILESET 1 — YOUR BASEMAP TILES
+  map.addSource('tileset1', {
+    type: 'raster',
+    tiles: [
+      'assets/tileset_1_basemap/{z}/{x}/{y}.png'
+    ],
+    tileSize: 256
+  });
+
+  map.addLayer({
+    id: 'tileset1-layer',
+    type: 'raster',
+    source: 'tileset1'
+  });
+
+  // TILESET 2 — PARKS
+  map.addSource('parks', {
+    type: 'raster',
+    tiles: [
+      'assets/tileset_2_parks/{z}/{x}/{y}.png'
+    ],
+    tileSize: 256
+  });
+
+  map.addLayer({
+    id: 'parks-layer',
+    type: 'raster',
+    source: 'parks'
+  });
+
+  // TOGGLE BASEMAP
+  document.getElementById('basemap').onclick = function() {
+    const visibility = map.getLayoutProperty('tileset1-layer', 'visibility');
+    map.setLayoutProperty(
+      'tileset1-layer',
+      'visibility',
+      visibility === 'none' ? 'visible' : 'none'
+    );
+  };
+
+  // TOGGLE PARKS
+  document.getElementById('parks').onclick = function() {
+    const visibility = map.getLayoutProperty('parks-layer', 'visibility');
+    map.setLayoutProperty(
+      'parks-layer',
+      'visibility',
+      visibility === 'none' ? 'visible' : 'none'
+    );
+  };
+
+});
+
+</script>
+
 </body>
 </html>
