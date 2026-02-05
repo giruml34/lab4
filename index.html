@@ -1,47 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<title>Lab 4</title>
+  <meta charset="utf-8" />
+  <title>My Seattle Map</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-  html, body { margin:0; height:100%; }
-  #map { height:100vh; width:100vw; }
-</style>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+    }
+  </style>
 </head>
 
 <body>
+
 <div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
-var map = L.map('map').setView([47.6062, -122.3321], 12);
+// Start at zoom 15 because your basemap tiles start at 15
+var map = L.map('map').setView([47.6062, -122.3321], 15);
 
-// ✅ Tileset 1 (colon must be encoded)
-var basemap = L.tileLayer(
+// Basemap tiles
+var myBasemap = L.tileLayer(
   'assets/tileset_1_basemap%3A/{z}/{x}/{y}.png',
-  { maxZoom: 18 }
+  {
+    minZoom: 15,
+    maxZoom: 16,
+    attribution: "My basemap"
+  }
 );
 
-// ✅ Tileset 2 (no encoding needed)
+// Parks tiles
 var parks = L.tileLayer(
   'assets/tileset_2_parks/{z}/{x}/{y}.png',
-  { maxZoom: 18, opacity: 0.85 }
+  {
+    maxZoom: 18,
+    opacity: 0.85,
+    attribution: "Seattle Parks"
+  }
 );
 
-// add layers
-basemap.addTo(map);
+// Add layers to map
+myBasemap.addTo(map);
 parks.addTo(map);
 
-// layer control
-L.control.layers(null, {
-  "My basemap (tileset_1)": basemap,
-  "Parks (tileset_2)": parks
-}).addTo(map);
+// Layer control
+L.control.layers(
+  { "My basemap": myBasemap },
+  { "Parks": parks }
+).addTo(map);
 
 </script>
+
 </body>
 </html>
