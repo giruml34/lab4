@@ -1,7 +1,7 @@
 # Lab 4 – Map Design and Tile Generation
 
 ## Web Map URL
-https://girum34.github.io/lab4/
+[https://girum34.github.io/lab4/](https://giruml34.github.io/lab4/)
 
 ---
 
