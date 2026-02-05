@@ -2,16 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Lab 4 - Seattle Tiles</title>
+  <title>Lab 4 - Seattle Parks Tiles</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <!-- Mapbox GL JS -->
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
   <style>
-    html, body { height: 100%; margin: 0; }
-    #map { position: absolute; inset: 0; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
 
+    /* Simple layer switcher box */
     .layer-control {
       position: absolute;
       top: 12px;
@@ -22,9 +24,12 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       font-size: 14px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-      max-width: 260px;
+      max-width: 240px;
     }
-    .layer-control h3 { margin: 0 0 8px 0; font-size: 14px; }
+    .layer-control h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+    }
     .layer-control label { display: block; margin: 6px 0; cursor: pointer; }
   </style>
 </head>
@@ -45,9 +50,10 @@
   </div>
 
   <script>
+    // ✅ Your Mapbox token (as you provided)
     mapboxgl.accessToken = "pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg";
 
-    // Empty style so ONLY your tiles render (no Mapbox basemap behind)
+    // Use an "empty" style so ONLY your local raster tiles show (no default Mapbox basemap)
     const emptyStyle = {
       version: 8,
       sources: {},
@@ -60,47 +66,44 @@
       container: "map",
       style: emptyStyle,
       center: [-122.3321, 47.6062], // Seattle
-      zoom: 14,                     // start zoomed in so tiles show
-      minZoom: 10,
-      maxZoom: 19
+      zoom: 12
     });
 
     map.addControl(new mapboxgl.NavigationControl(), "top-right");
     map.addControl(new mapboxgl.ScaleControl({ maxWidth: 120, unit: "imperial" }));
 
     map.on("load", () => {
-      // ---- Tile Set 1: My basemap ----
-      map.addSource("tileset1", {
+      // 1) My basemap tiles (tileset_1_basemap)
+      map.addSource("tileset1-basemap", {
         type: "raster",
-        tiles: ["assets/tileset_1_basemap/{z}/{x}/{y}.png"],
-        tileSize: 256,
-        minzoom: 12,
-        maxzoom: 18
+        tiles: [
+          "assets/tileset_1_basemap/{z}/{x}/{y}.png"
+        ],
+        tileSize: 256
       });
 
       map.addLayer({
         id: "my-basemap",
         type: "raster",
-        source: "tileset1"
+        source: "tileset1-basemap"
       });
 
-      // ---- Tile Set 2: Parks ----
-      map.addSource("tileset2", {
+      // 2) Parks tiles (tileset_2_parks 2) -> space must be %20
+      map.addSource("tileset2-parks", {
         type: "raster",
-        tiles: ["assets/tileset_2_parks/{z}/{x}/{y}.png"],
-        tileSize: 256,
-        minzoom: 12,
-        maxzoom: 18
+        tiles: [
+          "assets/tileset_2_parks%202/{z}/{x}/{y}.png"
+        ],
+        tileSize: 256
       });
 
-      // put parks ABOVE basemap
       map.addLayer({
         id: "parks",
         type: "raster",
-        source: "tileset2"
+        source: "tileset2-parks"
       });
 
-      // toggles
+      // Layer toggles
       function setVisibility(layerId, visible) {
         map.setLayoutProperty(layerId, "visibility", visible ? "visible" : "none");
       }
