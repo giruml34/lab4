@@ -1,104 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<title>My Seattle Parks Map</title>
+  <meta charset="utf-8" />
+  <title>My Seattle Parks Map</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 
-<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet" />
 
-<script src="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js"></script>
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet">
+  <style>
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
 
-<style>
-body { margin: 0; padding: 0; }
-#map { position: absolute; top: 0; bottom: 0; width: 100%; }
-
-.menu {
-  position: absolute;
-  background: white;
-  padding: 10px;
-  margin: 10px;
-  font-family: sans-serif;
-  z-index: 1;
-}
-</style>
+    .menu {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: white;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-family: sans-serif;
+      font-size: 14px;
+      z-index: 1;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.15);
+    }
+    .menu b { display:block; margin-bottom:6px; }
+  </style>
 </head>
 
 <body>
+  <div id="map"></div>
 
-<div id="map"></div>
+  <div class="menu">
+    <b>Layers</b>
+    <label><input type="checkbox" id="toggle-basemap" checked> My Basemap (tileset_1)</label><br>
+    <label><input type="checkbox" id="toggle-parks" checked> Parks (tileset_2)</label>
+  </div>
 
-<div class="menu">
-<label><input type="checkbox" id="basemap" checked> My Basemap</label><br>
-<label><input type="checkbox" id="parks" checked> Parks</label>
-</div>
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg';
 
-<script>
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/light-v11', // background basemap
+      center: [-122.33, 47.60],
+      zoom: 12
+    });
 
-mapboxgl.accessToken = 'pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg';
+    map.on('load', () => {
 
-const map = new mapboxgl.Map({
-  container: 'map',
-  style: 'mapbox://styles/mapbox/light-v11', // background basemap
-  center: [-122.33, 47.60],
-  zoom: 12
-});
+      // --- TILESET 1: YOUR BASEMAP TILES (draw first, so it's underneath parks) ---
+      map.addSource('tileset_1_basemap', {
+        type: 'raster',
+        tiles: ['assets/tileset_1_basemap/{z}/{x}/{y}.png'],
+        tileSize: 256
+      });
 
-map.on('load', () => {
+      map.addLayer({
+        id: 'tileset_1_basemap_layer',
+        type: 'raster',
+        source: 'tileset_1_basemap'
+      });
 
-  // TILESET 1 — YOUR BASEMAP TILES
-  map.addSource('tileset1', {
-    type: 'raster',
-    tiles: [
-      'assets/tileset_1_basemap/{z}/{x}/{y}.png'
-    ],
-    tileSize: 256
-  });
+      // --- TILESET 2: PARKS (draw on top) ---
+      map.addSource('tileset_2_parks', {
+        type: 'raster',
+        tiles: ['assets/tileset_2_parks/{z}/{x}/{y}.png'],
+        tileSize: 256
+      });
 
-  map.addLayer({
-    id: 'tileset1-layer',
-    type: 'raster',
-    source: 'tileset1'
-  });
+      map.addLayer({
+        id: 'tileset_2_parks_layer',
+        type: 'raster',
+        source: 'tileset_2_parks'
+      });
 
-  // TILESET 2 — PARKS
-  map.addSource('parks', {
-    type: 'raster',
-    tiles: [
-      'assets/tileset_2_parks/{z}/{x}/{y}.png'
-    ],
-    tileSize: 256
-  });
+      // Toggle: basemap tileset_1
+      document.getElementById('toggle-basemap').addEventListener('change', (e) => {
+        map.setLayoutProperty(
+          'tileset_1_basemap_layer',
+          'visibility',
+          e.target.checked ? 'visible' : 'none'
+        );
+      });
 
-  map.addLayer({
-    id: 'parks-layer',
-    type: 'raster',
-    source: 'parks'
-  });
+      // Toggle: parks tileset_2
+      document.getElementById('toggle-parks').addEventListener('change', (e) => {
+        map.setLayoutProperty(
+          'tileset_2_parks_layer',
+          'visibility',
+          e.target.checked ? 'visible' : 'none'
+        );
+      });
 
-  // TOGGLE BASEMAP
-  document.getElementById('basemap').onclick = function() {
-    const visibility = map.getLayoutProperty('tileset1-layer', 'visibility');
-    map.setLayoutProperty(
-      'tileset1-layer',
-      'visibility',
-      visibility === 'none' ? 'visible' : 'none'
-    );
-  };
-
-  // TOGGLE PARKS
-  document.getElementById('parks').onclick = function() {
-    const visibility = map.getLayoutProperty('parks-layer', 'visibility');
-    map.setLayoutProperty(
-      'parks-layer',
-      'visibility',
-      visibility === 'none' ? 'visible' : 'none'
-    );
-  };
-
-});
-
-</script>
-
+    });
+  </script>
 </body>
 </html>
