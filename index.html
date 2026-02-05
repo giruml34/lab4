@@ -1,67 +1,85 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>Lab 4 Map</title>
+<meta charset="utf-8" />
+<title>Seattle Parks Map</title>
 
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+}
 
-    #map {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
+#map {
+  width: 100%;
+  height: 100vh;
+}
+
+.header {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 8px 14px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 6px;
+  z-index: 1000;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+}
+</style>
 </head>
 
 <body>
 
+<div class="header">Seattle Parks Tileset Map</div>
 <div id="map"></div>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
-  // Center map on Seattle
-  var map = L.map('map').setView([47.61, -122.33], 12);
+// Create map
+var map = L.map('map').setView([47.6062, -122.3321], 12);
 
-  // Basemap tileset 1
-  var basemap = L.tileLayer('assets/tileset_1_basemap/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: 'My basemap'
-  }).addTo(map);
+// Tileset 1 – Basemap
+var basemap = L.tileLayer('assets/tileset_1_basemap/{z}/{x}/{y}.png', {
+  attribution: "Tileset 1 – My Basemap",
+  maxZoom: 18
+});
 
-  // Parks tileset 2
-  var parks2 = L.tileLayer('assets/tileset_2_parks/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: 'Seattle Parks (tileset 2)'
-  });
+// Tileset 2 – Parks
+var parks = L.tileLayer('assets/tileset_2_parks/{z}/{x}/{y}.png', {
+  attribution: "Tileset 2 – Parks",
+  maxZoom: 18
+});
 
-  // Parks tileset 3
-  var parks3 = L.tileLayer('assets/tileset_3_parks/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: 'Seattle Parks (tileset 3)'
-  });
+// Tileset 3 – Central District
+var central = L.tileLayer('assets/tileset_3_parks/{z}/{x}/{y}.png', {
+  attribution: "Tileset 3 – Central District",
+  maxZoom: 18
+});
 
-  // Layer control
-  var baseMaps = {
-      "My basemap (tileset 1)": basemap
-  };
+// Tileset 4 – Theme
+var theme = L.tileLayer('assets/tileset_4_theme/{z}/{x}/{y}.png', {
+  attribution: "Tileset 4 – Theme",
+  maxZoom: 18
+});
 
-  var overlays = {
-      "Parks (tileset 2)": parks2,
-      "Parks (tileset 3)": parks3
-  };
+// Add basemap by default
+basemap.addTo(map);
 
-  L.control.layers(baseMaps, overlays).addTo(map);
+// Layer switcher
+var overlays = {
+  "Tileset 1: My Basemap": basemap,
+  "Tileset 2: Parks": parks,
+  "Tileset 3: Central District": central,
+  "Tileset 4: Theme Map": theme
+};
+
+L.control.layers(null, overlays).addTo(map);
 
 </script>
 
