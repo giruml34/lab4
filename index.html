@@ -1,66 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>My Seattle Map</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <title>Lab 4 - Seattle Parks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
 
-<style>
-  body { margin: 0; padding: 0; }
-  #map { position: absolute; top: 0; bottom: 0; width: 100%; }
-</style>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #map { height: 100vh; width: 100vw; }
+    .leaflet-control-layers { font-size: 14px; }
+  </style>
 </head>
 
 <body>
-<div id="map"></div>
+  <div id="map"></div>
 
-<script>
-mapboxgl.accessToken = 'pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg';
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
 
-const map = new mapboxgl.Map({
-  container: 'map',
-  style: {
-    version: 8,
-    sources: {
-      "my-basemap": {
-        type: "raster",
-        tiles: ["assets/tileset_1_basemap/{z}/{x}/{y}.png"],
-        tileSize: 256
-      },
-      "parks": {
-        type: "raster",
-        tiles: ["assets/tileset_2_parks/{z}/{x}/{y}.png"],
-        tileSize: 256
-      }
-    },
-    layers: [
-      {
-        id: "background",
-        type: "background",
-        paint: { "background-color": "#f5f5f5" }
-      },
-      {
-        id: "my-basemap-layer",
-        type: "raster",
-        source: "my-basemap",
-        paint: { "raster-opacity": 1 }
-      },
-      {
-        id: "parks-layer",
-        type: "raster",
-        source: "parks",
-        paint: { "raster-opacity": 0.75 }   // <-- THIS is the fix
-      }
-    ]
-  },
-  center: [-122.33, 47.61],
-  zoom: 12
-});
+  <script>
+    // 1) Create map (Seattle area)
+    const map = L.map('map', {
+      zoomControl: true
+    }).setView([47.6062, -122.3321], 11);
 
-map.addControl(new mapboxgl.NavigationControl());
-</script>
+    // 2) YOUR local tiles (GitHub Pages paths)
+    //    Make sure these folders exist exactly:
+    //    lab4/assets/tileset_1_basemap/{z}/{x}/{y}.png
+    //    lab4/assets/tileset_2_parks/{z}/{x}/{y}.png
+
+    const myBasemap = L.tileLayer('assets/tileset_1_basemap/{z}/{x}/{y}.png', {
+      minZoom: 0,
+      maxZoom: 19,
+      attribution: 'My basemap (local tiles)'
+    });
+
+    const parks = L.tileLayer('assets/tileset_2_parks/{z}/{x}/{y}.png', {
+      minZoom: 0,
+      maxZoom: 19,
+      opacity: 0.85,     // you can change this
+      attribution: 'Seattle Parks (local tiles)'
+    });
+
+    // 3) Add basemap FIRST so you don't get the white background
+    myBasemap.addTo(map);
+    parks.addTo(map);
+
+    // 4) Layer control (this is where the label becomes "My basemap")
+    const baseLayers = {
+      "My basemap (tileset_1)": myBasemap
+    };
+
+    const overlays = {
+      "Parks (tileset_2)": parks
+    };
+
+    L.control.layers(baseLayers, overlays, { collapsed: false }).addTo(map);
+
+    // 5) Optional: keep the map from going to weird empty world copies
+    map.setMaxBounds([
+      [-85, -180],
+      [ 85,  180]
+    ]);
+  </script>
 </body>
 </html>
