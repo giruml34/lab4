@@ -1,87 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" />
-<title>Seattle Parks</title>
+  <meta charset="utf-8" />
+  <title>Lab 4 – Seattle Parks</title>
 
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
 
-<style>
-  body { margin: 0; padding: 0; }
-  #map { position: absolute; top: 0; bottom: 0; width: 100%; }
-  .menu {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: white;
-    padding: 10px;
-    border-radius: 6px;
-    font-family: sans-serif;
-    z-index: 1;
-  }
-</style>
+  <style>
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+
+    .menu {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: white;
+      padding: 10px;
+      border-radius: 6px;
+      font-family: sans-serif;
+      z-index: 1;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+    }
+  </style>
 </head>
 
 <body>
-<div id="map"></div>
+  <div id="map"></div>
 
-<div class="menu">
-  <label><input type="checkbox" id="tileset1" checked> Tileset 1 (Your basemap tiles)</label><br>
-  <label><input type="checkbox" id="tileset2" checked> Tileset 2 (Parks)</label>
-</div>
+  <div class="menu">
+    <label><input type="checkbox" id="parks" checked> Parks (tileset_2)</label>
+  </div>
 
-<script>
-mapboxgl.accessToken = 'pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg';
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg';
 
-const map = new mapboxgl.Map({
-  container: 'map',
-  style: 'mapbox://styles/mapbox/light-v11',   // <-- Mapbox fills the whole screen
-  center: [-122.33, 47.61],
-  zoom: 12
-});
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/light-v11', // ✅ THIS is the full-screen basemap
+      center: [-122.33, 47.61],
+      zoom: 12
+    });
 
-map.addControl(new mapboxgl.NavigationControl());
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-map.on('load', () => {
+    map.on('load', () => {
+      // Parks tileset (overlay)
+      map.addSource('tileset_2_parks', {
+        type: 'raster',
+        tiles: ['assets/tileset_2_parks/{z}/{x}/{y}.png'],
+        tileSize: 256
+      });
 
-  // Tileset 1 (your exported basemap tiles)
-  map.addSource('tileset_1', {
-    type: 'raster',
-    tiles: ['assets/tileset_1_basemap/{z}/{x}/{y}.png'],
-    tileSize: 256
-  });
+      map.addLayer({
+        id: 'tileset_2_parks',
+        type: 'raster',
+        source: 'tileset_2_parks',
+        paint: { 'raster-opacity': 1 }
+      });
+    });
 
-  map.addLayer({
-    id: 'tileset_1',
-    type: 'raster',
-    source: 'tileset_1',
-    paint: { 'raster-opacity': 1 }
-  });
-
-  // Tileset 2 (parks tiles)
-  map.addSource('tileset_2', {
-    type: 'raster',
-    tiles: ['assets/tileset_2_parks/{z}/{x}/{y}.png'],
-    tileSize: 256
-  });
-
-  map.addLayer({
-    id: 'tileset_2',
-    type: 'raster',
-    source: 'tileset_2',
-    paint: { 'raster-opacity': 1 }
-  });
-
-});
-
-// toggle checkboxes
-document.getElementById('tileset1').onchange = (e) => {
-  map.setLayoutProperty('tileset_1', 'visibility', e.target.checked ? 'visible' : 'none');
-};
-document.getElementById('tileset2').onchange = (e) => {
-  map.setLayoutProperty('tileset_2', 'visibility', e.target.checked ? 'visible' : 'none');
-};
-</script>
+    document.getElementById('parks').addEventListener('change', (e) => {
+      map.setLayoutProperty(
+        'tileset_2_parks',
+        'visibility',
+        e.target.checked ? 'visible' : 'none'
+      );
+    });
+  </script>
 </body>
 </html>
