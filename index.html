@@ -37,6 +37,12 @@ body { margin:0; padding:0; }
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg';
 
+// Seattle bounding box (locks map area)
+const bounds = [
+  [-122.42, 47.55], // southwest
+  [-122.22, 47.72]  // northeast
+];
+
 const map = new mapboxgl.Map({
   container: 'map',
   style: {
@@ -47,16 +53,16 @@ const map = new mapboxgl.Map({
     ]
   },
   center: [-122.33, 47.61],
-  zoom: 15,
+  zoom: 14,
   minZoom: 12,
-  maxZoom: 18
+  maxZoom: 18,
+  maxBounds: bounds
 });
 
 map.addControl(new mapboxgl.NavigationControl());
 
 map.on('load', () => {
 
-  // BASEMAP
   map.addSource('tileset_1', {
     type: 'raster',
     tiles: ['assets/tileset_1_basemap/{z}/{x}/{y}.png'],
@@ -69,7 +75,6 @@ map.on('load', () => {
     source: 'tileset_1'
   });
 
-  // PARKS
   map.addSource('tileset_2', {
     type: 'raster',
     tiles: ['assets/tileset_2_parks/{z}/{x}/{y}.png'],
@@ -84,7 +89,7 @@ map.on('load', () => {
 
 });
 
-// Layer switcher
+// Layer toggles
 document.getElementById('basemap').onchange = function(e) {
   map.setLayoutProperty('tileset_1', 'visibility', e.target.checked ? 'visible' : 'none');
 };
