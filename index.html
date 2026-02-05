@@ -1,81 +1,118 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Lab 4 – UW Campus Tiles</title>
+  <title>Lab 4 - Seattle Tiles</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
   <style>
-    html, body { margin:0; padding:0; height:100%; }
-    #map { position:absolute; top:0; bottom:0; width:100%; }
-    .panel{
-      position:absolute; top:12px; left:12px; z-index:1;
-      background:rgba(255,255,255,.92); padding:12px;
-      border-radius:10px; font-family:system-ui; max-width:320px;
-      box-shadow:0 6px 18px rgba(0,0,0,.15);
-      font-size:12px;
+    html, body { height: 100%; margin: 0; }
+    #map { position: absolute; inset: 0; }
+
+    .layer-control {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(255,255,255,0.92);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      max-width: 260px;
     }
-    .panel h1{ margin:0 0 8px; font-size:14px; }
-    .panel label{ display:flex; gap:8px; align-items:center; margin:6px 0; cursor:pointer; }
+    .layer-control h3 { margin: 0 0 8px 0; font-size: 14px; }
+    .layer-control label { display: block; margin: 6px 0; cursor: pointer; }
   </style>
 </head>
+
 <body>
-<div id="map"></div>
+  <div id="map"></div>
 
-<div class="panel">
-  <h1>Lab 4 – UW Campus Tiles</h1>
-  <div>Toggle layers:</div>
-  <label><input type="checkbox" id="t1" checked> Tileset 1 – Basemap</label>
-  <label><input type="checkbox" id="t2"> Tileset 2 – Thematic</label>
-  <label><input type="checkbox" id="t3"> Tileset 3 – Combined</label>
-  <label><input type="checkbox" id="t4"> Tileset 4 – Theme Map</label>
-</div>
+  <div class="layer-control">
+    <h3>Layers</h3>
+    <label>
+      <input id="toggle-basemap" type="checkbox" checked />
+      My basemap (tileset_1)
+    </label>
+    <label>
+      <input id="toggle-parks" type="checkbox" checked />
+      Parks (tileset_2)
+    </label>
+  </div>
 
-<script>
-  const blankStyle = {
-    version: 8,
-    sources: {},
-    layers: [{ id: "background", type: "background", paint: { "background-color": "#f8f8f8" } }]
-  };
+  <script>
+    mapboxgl.accessToken = "pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg";
 
-  const map = new mapboxgl.Map({
-    container: "map",
-    style: blankStyle,
-    center: [-122.305, 47.655], // UW
-    zoom: 13
-  });
+    // Empty style so ONLY your tiles render (no Mapbox basemap behind)
+    const emptyStyle = {
+      version: 8,
+      sources: {},
+      layers: [
+        { id: "background", type: "background", paint: { "background-color": "#f7f7f7" } }
+      ]
+    };
 
-  map.addControl(new mapboxgl.NavigationControl(), "top-right");
-  map.addControl(new mapboxgl.ScaleControl({ maxWidth: 120, unit: "imperial" }));
-  map.addControl(new mapboxgl.AttributionControl({ compact: true }));
+    const map = new mapboxgl.Map({
+      container: "map",
+      style: emptyStyle,
+      center: [-122.3321, 47.6062], // Seattle
+      zoom: 14,                     // start zoomed in so tiles show
+      minZoom: 10,
+      maxZoom: 19
+    });
 
-  map.on("load", () => {
-    const sources = [
-      ["tileset-1", "assets/tileset_1/{z}/{x}/{y}.png", "layer-1", "visible"],
-      ["tileset-2", "assets/tileset_2/{z}/{x}/{y}.png", "layer-2", "none"],
-      ["tileset-3", "assets/tileset_3/{z}/{x}/{y}.png", "layer-3", "none"],
-      ["tileset-4", "assets/tileset_4/{z}/{x}/{y}.png", "layer-4", "none"],
-    ];
+    map.addControl(new mapboxgl.NavigationControl(), "top-right");
+    map.addControl(new mapboxgl.ScaleControl({ maxWidth: 120, unit: "imperial" }));
 
-    for (const [srcId, path, layerId, vis] of sources) {
-      map.addSource(srcId, { type: "raster", tiles: [path], tileSize: 256 });
-      map.addLayer({ id: layerId, type: "raster", source: srcId, layout: { visibility: vis } });
-    }
-
-    function bindToggle(boxId, layerId) {
-      document.getElementById(boxId).addEventListener("change", (e) => {
-        map.setLayoutProperty(layerId, "visibility", e.target.checked ? "visible" : "none");
+    map.on("load", () => {
+      // ---- Tile Set 1: My basemap ----
+      map.addSource("tileset1", {
+        type: "raster",
+        tiles: ["assets/tileset_1_basemap/{z}/{x}/{y}.png"],
+        tileSize: 256,
+        minzoom: 12,
+        maxzoom: 18
       });
-    }
-    bindToggle("t1", "layer-1");
-    bindToggle("t2", "layer-2");
-    bindToggle("t3", "layer-3");
-    bindToggle("t4", "layer-4");
-  });
-</script>
+
+      map.addLayer({
+        id: "my-basemap",
+        type: "raster",
+        source: "tileset1"
+      });
+
+      // ---- Tile Set 2: Parks ----
+      map.addSource("tileset2", {
+        type: "raster",
+        tiles: ["assets/tileset_2_parks/{z}/{x}/{y}.png"],
+        tileSize: 256,
+        minzoom: 12,
+        maxzoom: 18
+      });
+
+      // put parks ABOVE basemap
+      map.addLayer({
+        id: "parks",
+        type: "raster",
+        source: "tileset2"
+      });
+
+      // toggles
+      function setVisibility(layerId, visible) {
+        map.setLayoutProperty(layerId, "visibility", visible ? "visible" : "none");
+      }
+
+      document.getElementById("toggle-basemap").addEventListener("change", (e) => {
+        setVisibility("my-basemap", e.target.checked);
+      });
+
+      document.getElementById("toggle-parks").addEventListener("change", (e) => {
+        setVisibility("parks", e.target.checked);
+      });
+    });
+  </script>
 </body>
 </html>
-
