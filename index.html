@@ -1,64 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>My Seattle Map</title>
+<meta charset="utf-8">
+<title>Lab 4 Map</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
 
-  <style>
-    html, body, #map {
-      height: 100%;
-      margin: 0;
-    }
-  </style>
+<style>
+body { margin:0; padding:0; }
+#map { position:absolute; top:0; bottom:0; width:100%; }
+</style>
 </head>
 
 <body>
 
 <div id="map"></div>
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
 
-// Start at zoom 15 because your basemap tiles start at 15
-var map = L.map('map').setView([47.6062, -122.3321], 15);
+mapboxgl.accessToken = 'pk.eyJ1IjoiZ2lydW13IiwiYSI6ImNtaGNsMnczejI4a2cybXB1b3h6dHBuaHkifQ.fO5Cyk2RL57zq0RKG8BDkg';
 
-// Basemap tiles
-var myBasemap = L.tileLayer(
-  'assets/tileset_1_basemap%3A/{z}/{x}/{y}.png',
-  {
-    minZoom: 15,
-    maxZoom: 16,
-    attribution: "My basemap"
-  }
-);
+const map = new mapboxgl.Map({
+container: 'map',
+style: 'mapbox://styles/mapbox/light-v11',
+center: [-122.33, 47.60],
+zoom: 13
+});
 
-// Parks tiles
-var parks = L.tileLayer(
-  'assets/tileset_2_parks/{z}/{x}/{y}.png',
-  {
-    maxZoom: 18,
-    opacity: 0.85,
-    attribution: "Seattle Parks"
-  }
-);
+map.on('load', () => {
 
-// Add layers to map
-myBasemap.addTo(map);
-parks.addTo(map);
+map.addSource('basemap', {
+type: 'raster',
+tiles: ['assets/tileset_1_basemap/{z}/{x}/{y}.png'],
+tileSize: 256
+});
 
-// Layer control
-L.control.layers(
-  { "My basemap": myBasemap },
-  { "Parks": parks }
-).addTo(map);
+map.addLayer({
+id: 'basemap',
+type: 'raster',
+source: 'basemap'
+});
+
+map.addSource('parks', {
+type: 'raster',
+tiles: ['assets/tileset_2_parks/{z}/{x}/{y}.png'],
+tileSize: 256
+});
+
+map.addLayer({
+id: 'parks',
+type: 'raster',
+source: 'parks'
+});
+
+});
 
 </script>
 
